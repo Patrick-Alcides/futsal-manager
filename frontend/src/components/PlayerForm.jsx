@@ -67,13 +67,28 @@ export default function PlayerForm({ onSubmit, editingPlayer, onCancel, mode = "
         value={form.senha}
         onChange={(e) => update("senha", e.target.value)}
       />
-      <input
-        className="field"
-        type="url"
-        placeholder="URL da foto (opcional)"
-        value={form.foto_url}
-        onChange={(e) => update("foto_url", e.target.value)}
-      />
+      <div className="flex items-center gap-4">
+        {form.foto_url && (
+            <img src={form.foto_url} alt="Preview" className="h-12 w-12 rounded-xl object-cover" />
+        )}
+        <label className="flex-1 cursor-pointer">
+          <span className="button-secondary flex w-full justify-center">
+            {form.foto_url ? "Mudar Foto" : "Escolher Foto do PC/Celular"}
+          </span>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => update("foto_url", ev.target.result);
+              reader.readAsDataURL(file);
+            }}
+          />
+        </label>
+      </div>
       <div className="flex gap-3 md:col-span-2 xl:col-span-3">
         <button className="button-primary" type="submit">
           {editingPlayer ? (isSelfEdit ? "Salvar meus dados" : "Salvar jogador") : "Cadastrar jogador"}
