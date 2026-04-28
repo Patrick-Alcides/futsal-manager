@@ -24,11 +24,11 @@ DATABASE_URL = _normalize_database_url(os.getenv("DATABASE_URL", "sqlite:///./fu
 SECRET_KEY = os.getenv("SECRET_KEY", "futsal-secret-key-dev")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").strip()
 
-DEFAULT_CORS_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-if FRONTEND_URL and FRONTEND_URL not in DEFAULT_CORS_ORIGINS:
-    DEFAULT_CORS_ORIGINS.append(FRONTEND_URL)
+_cors_env = os.getenv("CORS_ORIGINS", "").strip()
 
-CORS_ORIGINS = _split_origins(os.getenv("CORS_ORIGINS", ",".join(DEFAULT_CORS_ORIGINS)))
+# Se CORS_ORIGINS não estiver definida, aceitar todas as origens (*)
+# para evitar bloqueios ao trocar de domínio Vercel/Render.
+if _cors_env:
+    CORS_ORIGINS = _split_origins(_cors_env)
+else:
+    CORS_ORIGINS = ["*"]
