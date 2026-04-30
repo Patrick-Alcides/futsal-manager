@@ -28,13 +28,13 @@ function formatPosition(position) {
 
 function StatTile({ icon: Icon, label, value, subtitle }) {
   return (
-    <div className="rounded-[1.75rem] border border-sky-200/20 bg-white/10 p-5 text-white shadow-lg shadow-black/10">
+    <div className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-sky-100/70">{label}</p>
-        <Icon size={20} className="text-amber-300" />
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">{label}</p>
+        <Icon size={20} className="text-brand-600" />
       </div>
-      <p className="mt-3 font-['Space_Grotesk'] text-4xl font-black text-amber-300">{value}</p>
-      {subtitle ? <p className="mt-1 text-sm text-sky-100/60">{subtitle}</p> : null}
+      <p className="mt-3 font-['Space_Grotesk'] text-4xl font-black text-ink">{value}</p>
+      {subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}
     </div>
   );
 }
@@ -118,13 +118,13 @@ export default function GoalRankingPage() {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[2rem] bg-[#102235] text-white shadow-panel">
-        <div className="border-b border-amber-300/20 bg-[#0b1725] px-6 py-5">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-amber-300">Temporada atual</p>
+      <section className="panel overflow-hidden">
+        <div className="border-b border-slate-100 bg-white px-6 py-5">
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-brand-700">Temporada atual</p>
           <h2 className="mt-2 font-['Space_Grotesk'] text-4xl font-black uppercase md:text-5xl">
-            Ranking de <span className="text-amber-300">Gols</span>
+            Ranking de <span className="text-brand-700">Gols</span>
           </h2>
-          <p className="mt-3 max-w-2xl text-sky-100/65">
+          <p className="mt-3 max-w-2xl text-slate-500">
             Classificacao dos artilheiros do grupo. Clique no atleta para abrir o perfil esportivo.
           </p>
         </div>
@@ -132,11 +132,11 @@ export default function GoalRankingPage() {
         {profile ? (
           <div className="grid gap-6 p-6 xl:grid-cols-[0.85fr_1.6fr]">
             <div>
-              <button className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-sky-100/70 hover:text-white" onClick={() => navigate("/ranking-gols")}>
+              <button className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-ink" onClick={() => navigate("/ranking-gols")}>
                 <ArrowLeft size={18} />
                 Voltar ao ranking
               </button>
-              <div className="overflow-hidden rounded-[2rem] border border-sky-200/20 bg-[#08111c]">
+              <div className="overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-lg shadow-slate-200/60">
                 <img
                   src={resolveImageUrl(profile.foto) || "https://placehold.co/420x420/102235/f8fafc?text=Futsal"}
                   alt={profile.nome}
@@ -144,30 +144,30 @@ export default function GoalRankingPage() {
                 />
                 <div className="flex items-center justify-between gap-4 p-5">
                   <div>
-                    <p className="font-['Space_Grotesk'] text-2xl font-black uppercase">{profile.nome}</p>
-                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-amber-300">{formatPosition(profile.posicao)}</p>
+                    <p className="font-['Space_Grotesk'] text-2xl font-black uppercase text-ink">{profile.nome}</p>
+                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-700">{formatPosition(profile.posicao)}</p>
                   </div>
-                  <p className="font-['Space_Grotesk'] text-3xl font-black text-amber-300">{profile.gols}</p>
+                  <p className="font-['Space_Grotesk'] text-3xl font-black text-brand-700">{profile.gols}</p>
                 </div>
               </div>
             </div>
 
             <div className="space-y-5">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[0.3em] text-sky-100/60">Perfil do atleta</p>
-                <h3 className="mt-2 font-['Space_Grotesk'] text-5xl font-black uppercase">{profile.nome}</h3>
+                <p className="text-sm font-bold uppercase tracking-[0.3em] text-brand-700">Perfil do atleta</p>
+                <h3 className="mt-2 font-['Space_Grotesk'] text-5xl font-black uppercase text-ink">{profile.nome}</h3>
               </div>
 
-              <div className="rounded-[2rem] border border-sky-200/20 bg-white/10 p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-sky-100/70">Posicao nos rankings</p>
+              <div className="rounded-[2rem] border border-slate-100 bg-slate-50 p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Posicao nos rankings</p>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  <span className="rounded-2xl bg-[#0b1725] px-4 py-3 font-bold text-amber-300">
+                  <span className="rounded-2xl bg-white px-4 py-3 font-bold text-brand-700">
                     {profile.ranking_gols}o em gols
                   </span>
-                  <span className="rounded-2xl bg-[#0b1725] px-4 py-3 font-bold text-amber-300">
+                  <span className="rounded-2xl bg-white px-4 py-3 font-bold text-brand-700">
                     {profile.ranking_media}o em media
                   </span>
-                  <span className="rounded-2xl bg-[#0b1725] px-4 py-3 font-bold text-sky-100">
+                  <span className="rounded-2xl bg-white px-4 py-3 font-bold text-slate-700">
                     <PaymentBadge status={profile.pagamento_status} />
                   </span>
                 </div>
@@ -240,7 +240,7 @@ export default function GoalRankingPage() {
 
                   <div>
                     <div className="h-2 rounded-full bg-slate-200">
-                      <div className="h-2 rounded-full bg-gradient-to-r from-amber-400 to-brand-500" style={{ width: `${progress}%` }} />
+                      <div className="h-2 rounded-full bg-gradient-to-r from-brand-500 to-amber-400" style={{ width: `${progress}%` }} />
                     </div>
                     <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                       {player.gols_por_partida.toFixed(2)} gols por partida
@@ -249,7 +249,7 @@ export default function GoalRankingPage() {
 
                   <div className="flex flex-wrap items-center justify-between gap-3 xl:justify-end">
                     <div className="text-right">
-                      <p className="font-['Space_Grotesk'] text-4xl font-black text-amber-600">{player.gols}</p>
+                      <p className="font-['Space_Grotesk'] text-4xl font-black text-brand-700">{player.gols}</p>
                       <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">gols</p>
                     </div>
 
