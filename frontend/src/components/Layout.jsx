@@ -1,4 +1,4 @@
-import { BarChart3, LogOut, ShieldCheck, Target, Trophy, Users } from "lucide-react";
+import { BarChart3, LogOut, Target, Users } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
@@ -6,8 +6,6 @@ const items = [
   { to: "/", label: "Dashboard", icon: BarChart3 },
   { to: "/jogadores", label: "Jogadores", icon: Users },
   { to: "/ranking-gols", label: "Ranking Gols", icon: Target },
-  { to: "/votacoes", label: "Votacoes", icon: Trophy },
-  { to: "/montar-jogo", label: "Montar Jogo", playerLabel: "Times", icon: ShieldCheck },
 ];
 
 export default function Layout() {
