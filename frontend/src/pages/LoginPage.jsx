@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { MessageCircle } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 export default function LoginPage() {
   const { user, login } = useAuth();
-  const [telefone, setTelefone] = useState("(51) 99999-1001");
-  const [senha, setSenha] = useState("admin123");
+  const [telefone, setTelefone] = useState("");
+  const [senha, setSenha] = useState("");
   const [error, setError] = useState("");
 
   if (user) {
@@ -44,8 +45,10 @@ export default function LoginPage() {
           <button type="submit" className="button-primary w-full">Entrar</button>
           <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
             <p className="font-semibold text-slate-900">Acesso inicial do administrador</p>
-            <p>Telefone: (51) 99999-1001</p>
-            <p>Senha: admin123</p>
+            <p className="mt-2 flex items-center gap-2 font-semibold text-brand-700">
+              <MessageCircle size={18} />
+              Chame no WhatsApp: (51) 99208-6770
+            </p>
           </div>
         </form>
       </div>
