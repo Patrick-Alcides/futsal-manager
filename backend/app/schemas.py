@@ -47,6 +47,11 @@ class PaymentUpdate(BaseModel):
     status: str
 
 
+class GoalStatUpdate(BaseModel):
+    gols: int = Field(ge=0)
+    partidas: int = Field(ge=0)
+
+
 class VoteItemInput(BaseModel):
     jogador_avaliado_id: int
     nota: int = Field(ge=1, le=10)

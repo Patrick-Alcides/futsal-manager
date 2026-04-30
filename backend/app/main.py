@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from .auth import create_access_token, get_current_user, hash_password, require_admin, verify_password
 from .database import Base, SessionLocal, engine, get_db
-from .models import Config, Game, GamePlayer, GeneratedTeam, Payment, Player, TeamPlayer, User, Vote, VoteSession
-from .schemas import ConfigUpdate, DashboardRead, GameGenerateInput, LoginInput, PaymentUpdate, Token, VoteBatchInput, VoteSessionCreate, VoteSessionUpdate
+from .models import Config, Game, GamePlayer, GeneratedTeam, GoalStat, Payment, Player, TeamPlayer, User, Vote, VoteSession
+from .schemas import ConfigUpdate, DashboardRead, GameGenerateInput, GoalStatUpdate, LoginInput, PaymentUpdate, Token, VoteBatchInput, VoteSessionCreate, VoteSessionUpdate
 from .seed import create_seed_data
 from .settings import CORS_ORIGINS
 
@@ -138,6 +138,38 @@ def serialize_player(db: Session, player: Player, averages: dict[int, float]) ->
     }
 
 
+def build_goal_ranking(db: Session) -> list[dict]:
+    averages, _ = build_vote_metrics(db)
+    players = db.query(Player).filter(Player.ativo.is_(True)).order_by(Player.nome.asc()).all()
+    stats_by_player = {stat.jogador_id: stat for stat in db.query(GoalStat).all()}
+    max_goals = max((stats_by_player.get(player.id).gols for player in players if stats_by_player.get(player.id)), default=0)
+
+    ranking = []
+    for player in players:
+        stat = stats_by_player.get(player.id)
+        goals = stat.gols if stat else 0
+        matches = stat.partidas if stat else 0
+        ranking.append(
+            {
+                "id": player.id,
+                "nome": player.nome,
+                "foto": player.foto,
+                "posicao": player.posicao,
+                "gols": goals,
+                "partidas": matches,
+                "gols_por_partida": round(goals / matches, 2) if matches else 0.0,
+                "media_geral": averages.get(player.id, 0.0),
+                "pagamento_status": payment_status_summary(db, player.id),
+                "progresso": round((goals / max_goals) * 100, 1) if max_goals else 0,
+            }
+        )
+
+    ranking.sort(key=lambda item: (-item["gols"], item["nome"].lower()))
+    for position, item in enumerate(ranking, start=1):
+        item["ranking_gols"] = position
+    return ranking
+
+
 def serialize_votation(session: VoteSession) -> dict:
     return {
         "id": session.id,
@@ -237,6 +269,58 @@ def list_players(db: Session = Depends(get_db), current_user: User = Depends(get
     return [serialize_player(db, player, averages) for player in players]
 
 
+@app.get("/api/goals/ranking")
+def list_goal_ranking(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    del current_user
+    return build_goal_ranking(db)
+
+
+@app.get("/api/goals/players/{player_id}")
+def goal_player_profile(player_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    del current_user
+    player = db.get(Player, player_id)
+    if not player or not player.ativo:
+        raise HTTPException(status_code=404, detail="Jogador nao encontrado.")
+
+    ranking = build_goal_ranking(db)
+    profile = next((item for item in ranking if item["id"] == player_id), None)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Jogador nao encontrado no ranking.")
+
+    by_average = sorted(ranking, key=lambda item: (-item["media_geral"], item["nome"].lower()))
+    average_position = next((index for index, item in enumerate(by_average, start=1) if item["id"] == player_id), len(by_average))
+    total_matches = max((item["partidas"] for item in ranking), default=0)
+    frequency = round((profile["partidas"] / total_matches) * 100) if total_matches else 0
+
+    return {
+        **profile,
+        "ranking_media": average_position,
+        "total_jogadores": len(ranking),
+        "frequencia": frequency,
+        "total_partidas_referencia": total_matches,
+    }
+
+
+@app.put("/api/goals/players/{player_id}")
+def update_goal_stats(player_id: int, payload: GoalStatUpdate, db: Session = Depends(get_db), admin: User = Depends(require_admin)):
+    del admin
+    player = db.get(Player, player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Jogador nao encontrado.")
+    if not player.ativo:
+        raise HTTPException(status_code=400, detail="Jogador inativo nao aparece no ranking.")
+
+    stat = db.query(GoalStat).filter(GoalStat.jogador_id == player_id).first()
+    if not stat:
+        stat = GoalStat(jogador_id=player_id)
+        db.add(stat)
+
+    stat.gols = payload.gols
+    stat.partidas = payload.partidas
+    db.commit()
+    return next(item for item in build_goal_ranking(db) if item["id"] == player_id)
+
+
 @app.post("/api/players")
 def create_player(
     nome: str = Form(...),
@@ -334,6 +418,7 @@ def delete_player(player_id: int, db: Session = Depends(get_db), admin: User = D
 
     db.query(User).filter(User.jogador_id == player_id).delete(synchronize_session=False)
     db.query(Payment).filter(Payment.jogador_id == player_id).delete(synchronize_session=False)
+    db.query(GoalStat).filter(GoalStat.jogador_id == player_id).delete(synchronize_session=False)
     db.query(Vote).filter(Vote.jogador_votante_id == player_id).delete(synchronize_session=False)
     db.query(Vote).filter(Vote.jogador_avaliado_id == player_id).delete(synchronize_session=False)
     db.query(GamePlayer).filter(GamePlayer.jogador_id == player_id).delete(synchronize_session=False)

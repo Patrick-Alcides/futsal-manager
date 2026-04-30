@@ -31,6 +31,13 @@ class Player(Base):
 
     usuario: Mapped["User | None"] = relationship("User", back_populates="jogador", uselist=False)
     pagamentos: Mapped[list["Payment"]] = relationship("Payment", back_populates="jogador", cascade="all, delete-orphan")
+    estatistica_gols: Mapped["GoalStat | None"] = relationship(
+        "GoalStat",
+        back_populates="jogador",
+        cascade="all, delete-orphan",
+        single_parent=True,
+        uselist=False,
+    )
     votos_recebidos: Mapped[list["Vote"]] = relationship(
         "Vote",
         back_populates="jogador_avaliado",
@@ -41,6 +48,18 @@ class Player(Base):
         back_populates="jogador_votante",
         foreign_keys="Vote.jogador_votante_id",
     )
+
+
+class GoalStat(Base):
+    __tablename__ = "gols_jogadores"
+    __table_args__ = (UniqueConstraint("jogador_id", name="uq_gols_jogador"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    jogador_id: Mapped[int] = mapped_column(ForeignKey("jogadores.id"), nullable=False)
+    gols: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    partidas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    jogador: Mapped["Player"] = relationship("Player", back_populates="estatistica_gols")
 
 
 class Payment(Base):

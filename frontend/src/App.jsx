@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import { useAuth } from "./hooks/useAuth";
 import DashboardPage from "./pages/DashboardPage";
 import GameBuilderPage from "./pages/GameBuilderPage";
+import GoalRankingPage from "./pages/GoalRankingPage";
 import LoginPage from "./pages/LoginPage";
 import PlayersPage from "./pages/PlayersPage";
 import VotingsPage from "./pages/VotingsPage";
@@ -25,6 +26,8 @@ export default function App() {
       <Route path="/" element={<Protected />}>
         <Route index element={<DashboardPage />} />
         <Route path="jogadores" element={<PlayersPage />} />
+        <Route path="ranking-gols" element={<GoalRankingPage />} />
+        <Route path="ranking-gols/:playerId" element={<GoalRankingPage />} />
         <Route path="votacoes" element={<VotingsPage />} />
         <Route path="montar-jogo" element={<GameBuilderPage />} />
       </Route>
