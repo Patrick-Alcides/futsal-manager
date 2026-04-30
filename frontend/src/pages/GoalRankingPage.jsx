@@ -168,9 +168,6 @@ export default function GoalRankingPage() {
                   <span className="rounded-2xl bg-white px-4 py-3 font-bold text-brand-700">
                     {formatRank(profile.ranking_gols)} em gols
                   </span>
-                  <span className="rounded-2xl bg-white px-4 py-3 font-bold text-brand-700">
-                    {formatRank(profile.ranking_media)} em média
-                  </span>
                   <span className="rounded-2xl bg-white px-4 py-3 font-bold text-slate-700">
                     <PaymentBadge status={profile.pagamento_status} />
                   </span>
