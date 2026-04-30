@@ -26,6 +26,10 @@ function formatPosition(position) {
   return labels[position] || position || "Linha";
 }
 
+function formatRank(position) {
+  return `${position}º`;
+}
+
 function StatTile({ icon: Icon, label, value, subtitle }) {
   return (
     <div className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5">
@@ -125,7 +129,7 @@ export default function GoalRankingPage() {
             Ranking de <span className="text-brand-700">Gols</span>
           </h2>
           <p className="mt-3 max-w-2xl text-slate-500">
-            Classificacao dos artilheiros do grupo. Clique no atleta para abrir o perfil esportivo.
+            Classificação dos artilheiros do grupo. Clique no atleta para abrir o perfil esportivo.
           </p>
         </div>
 
@@ -159,13 +163,13 @@ export default function GoalRankingPage() {
               </div>
 
               <div className="rounded-[2rem] border border-slate-100 bg-slate-50 p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Posicao nos rankings</p>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Posição nos rankings</p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <span className="rounded-2xl bg-white px-4 py-3 font-bold text-brand-700">
-                    {profile.ranking_gols}o em gols
+                    {formatRank(profile.ranking_gols)} em gols
                   </span>
                   <span className="rounded-2xl bg-white px-4 py-3 font-bold text-brand-700">
-                    {profile.ranking_media}o em media
+                    {formatRank(profile.ranking_media)} em média
                   </span>
                   <span className="rounded-2xl bg-white px-4 py-3 font-bold text-slate-700">
                     <PaymentBadge status={profile.pagamento_status} />
