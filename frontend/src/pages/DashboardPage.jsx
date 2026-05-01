@@ -1,6 +1,7 @@
-import { Copy } from "lucide-react";
+import { Copy, Trophy } from "lucide-react";
 import { useEffect, useState } from "react";
-import { apiFetch } from "../api";
+import { Link } from "react-router-dom";
+import { apiFetch, resolveImageUrl } from "../api";
 import StatCard from "../components/StatCard";
 import { useAuth } from "../hooks/useAuth";
 
@@ -32,16 +33,73 @@ function buildMonthCalendar() {
   return { monthName, days };
 }
 
+function RankingLeaderCard({ player }) {
+  if (!player) {
+    return (
+      <div className="panel p-5">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-700">Ranking de Gols</p>
+        <p className="mt-3 text-slate-500">Sem jogadores no ranking ainda.</p>
+      </div>
+    );
+  }
+
+  return (
+    <Link to={`/ranking-gols/${player.id}`} className="panel block overflow-hidden transition hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="bg-ink px-5 py-4 text-white">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-100">Ranking de Gols</p>
+            <h3 className="mt-1 font-['Space_Grotesk'] text-3xl font-bold">1º colocado</h3>
+          </div>
+          <Trophy className="text-amber-300" size={34} />
+        </div>
+      </div>
+      <div className="p-5">
+        <img
+          src={resolveImageUrl(player.foto) || "https://placehold.co/640x520/e2e8f0/334155?text=Futsal"}
+          alt={player.nome}
+          className="aspect-[4/3] w-full rounded-[1.75rem] object-cover"
+        />
+        <div className="mt-4 flex items-end justify-between gap-4">
+          <div>
+            <p className="font-['Space_Grotesk'] text-3xl font-black uppercase text-ink">{player.nome}</p>
+            <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand-700">{player.posicao}</p>
+          </div>
+          <div className="text-right">
+            <p className="font-['Space_Grotesk'] text-5xl font-black text-brand-700">{player.gols}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">gols</p>
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl bg-slate-50 px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Partidas</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-2xl font-bold">{player.partidas}</p>
+          </div>
+          <div className="rounded-2xl bg-brand-50 px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700">Gols/jogo</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-2xl font-bold">{Number(player.gols_por_partida || 0).toFixed(2)}</p>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [form, setForm] = useState(null);
+  const [goalLeader, setGoalLeader] = useState(null);
   const [message, setMessage] = useState("");
 
   async function load() {
-    const dashboard = await apiFetch("/dashboard");
+    const [dashboard, goalRanking] = await Promise.all([
+      apiFetch("/dashboard"),
+      apiFetch("/goals/ranking"),
+    ]);
     setData(dashboard);
     setForm(dashboard.config);
+    setGoalLeader(goalRanking?.[0] || null);
   }
 
   useEffect(() => {
@@ -147,7 +205,7 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
-          <StatCard title="Melhor média geral" value={data.destaque_jogador?.media_geral?.toFixed(2) || "0.00"} subtitle={data.destaque_jogador?.nome || "Sem votos ainda"} />
+          <RankingLeaderCard player={goalLeader} />
           {user?.tipo === "administrador" ? (
             <div className="panel space-y-4 p-5">
               <h3 className="font-['Space_Grotesk'] text-2xl font-bold">Editar caixa e PIX</h3>

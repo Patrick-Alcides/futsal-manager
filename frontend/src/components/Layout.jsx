@@ -17,7 +17,7 @@ export default function Layout() {
         <aside className="panel h-fit w-full p-5 lg:sticky lg:top-6 lg:w-72">
           <div className="mb-6">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-700">Grupo de Futsal</p>
-            <h1 className="font-['Space_Grotesk'] text-3xl font-bold text-ink">Futsal Manager</h1>
+            <h1 className="font-['Space_Grotesk'] text-3xl font-bold text-ink">Futsal terça-feira</h1>
           </div>
 
           {user?.tipo === "administrador" ? (
