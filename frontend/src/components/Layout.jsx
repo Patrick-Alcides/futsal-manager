@@ -22,7 +22,7 @@ export default function Layout() {
 
           {user?.tipo === "administrador" ? (
             <div className="mb-6 rounded-3xl bg-ink p-4 text-white">
-              <p className="text-sm opacity-70">{user?.email}</p>
+              <p className="text-sm opacity-70">Patrick Alcides</p>
               <p className="mt-2 text-lg font-bold uppercase">{user?.tipo}</p>
             </div>
           ) : null}
