@@ -111,16 +111,17 @@ def build_vote_metrics(db: Session) -> tuple[dict[int, float], dict[int, float]]
 
 
 def payment_status_summary(db: Session, player_id: int) -> str:
-    overdue_count = (
+    today = date.today()
+    current_payment = (
         db.query(Payment)
-        .filter(Payment.jogador_id == player_id, Payment.status != "OK")
-        .count()
+        .filter(Payment.jogador_id == player_id, Payment.mes == today.month, Payment.ano == today.year)
+        .first()
     )
-    if overdue_count >= 2:
+    if not current_payment or current_payment.status == "OK":
+        return "OK"
+    if current_payment.status == "DV 2+":
         return "DV 2+"
-    if overdue_count == 1:
-        return "DV 1"
-    return "OK"
+    return "DV 1"
 
 
 def serialize_player(db: Session, player: Player, averages: dict[int, float]) -> dict:
