@@ -48,6 +48,7 @@ class PaymentUpdate(BaseModel):
 
 
 class GoalStatUpdate(BaseModel):
+    vitorias: int = Field(default=0, ge=0)
     gols: int = Field(ge=0)
     partidas: int = Field(ge=0)
 

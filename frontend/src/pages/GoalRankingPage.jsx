@@ -8,6 +8,7 @@ import { useAuth } from "../hooks/useAuth";
 function buildForms(players) {
   return players.reduce((current, player) => {
     current[player.id] = {
+      vitorias: player.vitorias,
       gols: player.gols,
       partidas: player.partidas,
     };
@@ -101,7 +102,7 @@ export default function GoalRankingPage() {
     setMessage("");
     setError("");
     try {
-      const payload = forms[player.id] || { gols: 0, partidas: 0 };
+      const payload = forms[player.id] || { vitorias: 0, gols: 0, partidas: 0 };
       await apiFetch(`/goals/players/${player.id}`, {
         method: "PUT",
         body: JSON.stringify(payload),
@@ -110,7 +111,7 @@ export default function GoalRankingPage() {
       if (Number(playerId) === player.id) {
         await loadProfile(player.id);
       }
-      setMessage(`Gols de ${player.nome} atualizados.`);
+      setMessage(`Ranking de ${player.nome} atualizado.`);
     } catch (err) {
       setError(err.message);
     }
@@ -151,7 +152,7 @@ export default function GoalRankingPage() {
                     <p className="font-['Space_Grotesk'] text-2xl font-black uppercase text-ink">{profile.nome}</p>
                     <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-700">{formatPosition(profile.posicao)}</p>
                   </div>
-                  <p className="font-['Space_Grotesk'] text-3xl font-black text-brand-700">{profile.gols}</p>
+                  <p className="font-['Space_Grotesk'] text-3xl font-black text-brand-700">{profile.vitorias}</p>
                 </div>
               </div>
             </div>
@@ -166,7 +167,7 @@ export default function GoalRankingPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Posição nos rankings</p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <span className="rounded-2xl bg-white px-4 py-3 font-bold text-brand-700">
-                    {formatRank(profile.ranking_gols)} em gols
+                    {formatRank(profile.ranking_gols)} no ranking
                   </span>
                   <span className="rounded-2xl bg-white px-4 py-3 font-bold text-slate-700">
                     <PaymentBadge status={profile.pagamento_status} />
@@ -175,9 +176,9 @@ export default function GoalRankingPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <StatTile icon={Trophy} label="Gols" value={profile.gols} />
+                <StatTile icon={Trophy} label="Vitorias" value={profile.vitorias} />
+                <StatTile icon={Target} label="Gols" value={profile.gols} />
                 <StatTile icon={UserRound} label="Partidas jogadas" value={profile.partidas} />
-                <StatTile icon={Target} label="Gols por partida" value={profile.gols_por_partida.toFixed(2)} />
                 <StatTile icon={BarChart3} label="Frequencia" value={`${profile.frequencia}%`} subtitle={`${profile.partidas} de ${profile.total_partidas_referencia || 0} jogos`} />
               </div>
             </div>
@@ -196,15 +197,15 @@ export default function GoalRankingPage() {
           </div>
           {isAdmin ? (
             <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-              Admin: edite gols e partidas nesta tela.
+              Admin: edite vitorias, gols e jogos nesta tela.
             </div>
           ) : null}
         </div>
 
         <div className="space-y-3">
           {ranking.map((player) => {
-            const rowForm = forms[player.id] || { gols: player.gols, partidas: player.partidas };
-            const progress = Math.max(player.progresso, player.gols ? 8 : 0);
+            const rowForm = forms[player.id] || { vitorias: player.vitorias, gols: player.gols, partidas: player.partidas };
+            const progress = Math.max(player.progresso, player.vitorias || player.gols ? 8 : 0);
             const isSelected = Number(playerId) === player.id;
 
             return (
@@ -244,25 +245,35 @@ export default function GoalRankingPage() {
                       <div className="h-2 rounded-full bg-gradient-to-r from-brand-500 to-amber-400" style={{ width: `${progress}%` }} />
                     </div>
                     <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      {player.gols_por_partida.toFixed(2)} gols por partida
+                      {player.vitorias} vitorias | {player.gols} gols | {player.partidas} jogos
                     </p>
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-3 xl:justify-end">
                     <div className="text-right">
-                      <p className="font-['Space_Grotesk'] text-4xl font-black text-brand-700">{player.gols}</p>
-                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">gols</p>
+                      <p className="font-['Space_Grotesk'] text-4xl font-black text-brand-700">{player.vitorias}</p>
+                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">vitorias</p>
                     </div>
 
                     {isAdmin ? (
                       <form
-                        className="grid min-w-[15rem] grid-cols-[1fr_1fr_auto] items-end gap-2"
+                        className="grid min-w-[20rem] grid-cols-[1fr_1fr_1fr_auto] items-end gap-2"
                         onClick={(event) => event.stopPropagation()}
                         onSubmit={(event) => {
                           event.preventDefault();
                           saveStats(player);
                         }}
                       >
+                        <label className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                          Vitorias
+                          <input
+                            className="field mt-1 py-2"
+                            type="number"
+                            min="0"
+                            value={rowForm.vitorias}
+                            onChange={(event) => updateForm(player.id, "vitorias", event.target.value)}
+                          />
+                        </label>
                         <label className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
                           Gols
                           <input
@@ -283,7 +294,7 @@ export default function GoalRankingPage() {
                             onChange={(event) => updateForm(player.id, "partidas", event.target.value)}
                           />
                         </label>
-                        <button className="button-primary h-11 w-11 p-0" type="submit" title={`Salvar gols de ${player.nome}`}>
+                        <button className="button-primary h-11 w-11 p-0" type="submit" title={`Salvar ranking de ${player.nome}`}>
                           <Save size={18} />
                         </button>
                       </form>

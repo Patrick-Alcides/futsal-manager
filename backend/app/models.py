@@ -56,6 +56,7 @@ class GoalStat(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     jogador_id: Mapped[int] = mapped_column(ForeignKey("jogadores.id"), nullable=False)
+    vitorias: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     gols: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     partidas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 

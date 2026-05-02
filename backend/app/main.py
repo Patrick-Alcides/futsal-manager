@@ -4,7 +4,7 @@ from datetime import date
 
 from fastapi import Depends, FastAPI, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import func
+from sqlalchemy import func, inspect, text
 from sqlalchemy.orm import Session, joinedload
 
 from .auth import create_access_token, get_current_user, hash_password, require_admin, verify_password
@@ -27,8 +27,16 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+    ensure_goal_stats_schema()
     with SessionLocal() as db:
         create_seed_data(db)
+
+
+def ensure_goal_stats_schema() -> None:
+    columns = {column["name"] for column in inspect(engine).get_columns("gols_jogadores")}
+    if "vitorias" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE gols_jogadores ADD COLUMN vitorias INTEGER NOT NULL DEFAULT 0"))
 
 
 def normalize_photo_url(photo_url: str | None) -> str | None:
@@ -144,10 +152,12 @@ def build_goal_ranking(db: Session) -> list[dict]:
     players = db.query(Player).filter(Player.ativo.is_(True)).order_by(Player.nome.asc()).all()
     stats_by_player = {stat.jogador_id: stat for stat in db.query(GoalStat).all()}
     max_goals = max((stats_by_player.get(player.id).gols for player in players if stats_by_player.get(player.id)), default=0)
+    max_wins = max((stats_by_player.get(player.id).vitorias for player in players if stats_by_player.get(player.id)), default=0)
 
     ranking = []
     for player in players:
         stat = stats_by_player.get(player.id)
+        wins = stat.vitorias if stat else 0
         goals = stat.gols if stat else 0
         matches = stat.partidas if stat else 0
         ranking.append(
@@ -156,16 +166,17 @@ def build_goal_ranking(db: Session) -> list[dict]:
                 "nome": player.nome,
                 "foto": player.foto,
                 "posicao": player.posicao,
+                "vitorias": wins,
                 "gols": goals,
                 "partidas": matches,
                 "gols_por_partida": round(goals / matches, 2) if matches else 0.0,
                 "media_geral": averages.get(player.id, 0.0),
                 "pagamento_status": payment_status_summary(db, player.id),
-                "progresso": round((goals / max_goals) * 100, 1) if max_goals else 0,
+                "progresso": round((wins / max_wins) * 100, 1) if max_wins else round((goals / max_goals) * 100, 1) if max_goals else 0,
             }
         )
 
-    ranking.sort(key=lambda item: (-item["gols"], item["nome"].lower()))
+    ranking.sort(key=lambda item: (-item["vitorias"], -item["gols"], -item["partidas"], item["nome"].lower()))
     for position, item in enumerate(ranking, start=1):
         item["ranking_gols"] = position
     return ranking
@@ -316,6 +327,7 @@ def update_goal_stats(player_id: int, payload: GoalStatUpdate, db: Session = Dep
         stat = GoalStat(jogador_id=player_id)
         db.add(stat)
 
+    stat.vitorias = payload.vitorias
     stat.gols = payload.gols
     stat.partidas = payload.partidas
     db.commit()

@@ -66,17 +66,21 @@ function RankingLeaderCard({ player }) {
             <p className="text-sm font-bold uppercase tracking-[0.22em] text-brand-700">{player.posicao}</p>
           </div>
           <div className="text-right">
-            <p className="font-['Space_Grotesk'] text-5xl font-black text-brand-700">{player.gols}</p>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">gols</p>
+            <p className="font-['Space_Grotesk'] text-5xl font-black text-brand-700">{player.vitorias}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">vitorias</p>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-3 gap-3">
           <div className="rounded-2xl bg-slate-50 px-4 py-3">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Partidas</p>
-            <p className="mt-1 font-['Space_Grotesk'] text-2xl font-bold">{player.partidas}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Gols</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-2xl font-bold">{player.gols}</p>
           </div>
           <div className="rounded-2xl bg-brand-50 px-4 py-3">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700">Gols/jogo</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700">Jogos</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-2xl font-bold">{player.partidas}</p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Gols/jogo</p>
             <p className="mt-1 font-['Space_Grotesk'] text-2xl font-bold">{Number(player.gols_por_partida || 0).toFixed(2)}</p>
           </div>
         </div>
