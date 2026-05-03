@@ -1,4 +1,5 @@
-import { BarChart3, LogOut, Target, Users } from "lucide-react";
+import { BarChart3, LogOut, Moon, Sun, Target, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
@@ -10,6 +11,16 @@ const items = [
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const [theme, setTheme] = useState(() => localStorage.getItem("futsal_theme") || "light");
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("futsal_theme", theme);
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
 
   return (
     <div className="min-h-screen px-4 py-6 md:px-8">
@@ -48,6 +59,11 @@ export default function Layout() {
           <button onClick={logout} className="button-secondary mt-6 w-full gap-2">
             <LogOut size={18} />
             Sair
+          </button>
+
+          <button onClick={toggleTheme} className="button-secondary mt-3 w-full gap-2">
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === "dark" ? "Claro" : "Dark"}
           </button>
         </aside>
 
